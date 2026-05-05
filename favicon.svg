@@ -1,0 +1,28 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer border -->
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="#111111"/>
+  
+  <!-- Main split container -->
+  <clipPath id="clip">
+    <rect x="5" y="5" width="54" height="54" rx="9"/>
+  </clipPath>
+  
+  <g clip-path="url(#clip)">
+    <!-- Top-left: Green Do -->
+    <path d="M0 64L64 0H0V64Z" fill="#16a34a"/>
+    <!-- Bottom-right: Red Don't -->
+    <path d="M0 64L64 64V0L0 64Z" fill="#ff3b30"/>
+    
+    <!-- Diagonal border line -->
+    <path d="M0 64L64 0" stroke="#111111" stroke-width="6"/>
+    
+    <!-- Checkmark (Do side) -->
+    <path d="M14 26L22 34L36 18" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Cross (Don't side) -->
+    <path d="M40 40L54 54M54 40L40 54" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Final thick border for neo-brutalism look -->
+  <rect x="2" y="2" width="60" height="60" rx="12" stroke="#111111" stroke-width="4"/>
+</svg>
