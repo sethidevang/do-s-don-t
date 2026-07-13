@@ -493,41 +493,102 @@
 
     @media print {
       body {
-        background: #fff;
-        padding: 12mm;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
       }
 
-      .no-print {
+      .no-print,
+      .hero,
+      .row,
+      .site-footer,
+      body::before,
+      body::after {
         display: none !important;
       }
 
-      .print-shell {
-        border: 2px solid #222;
-        border-radius: 8px;
-        padding: 6mm;
+      .wrap {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+
+      #printArea {
+        display: block !important;
+        border: 3.5px solid #111 !important;
+        border-radius: 16px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #fff !important;
+        box-shadow: 6px 6px 0 #111 !important;
+        overflow: hidden !important;
       }
 
       .print-head {
-        font-family: Georgia, "Times New Roman", serif;
-        border-bottom: 2px solid #333;
-        margin-bottom: 5mm;
+        background: #f6f7fb !important;
+        border-bottom: 3.5px solid #111 !important;
+        padding: 5mm 8mm !important;
+        margin-bottom: 6mm !important;
+      }
+
+      .print-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+
+      .print-website-title {
+        font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+        font-size: 11pt;
+        font-weight: 800;
+        color: #111;
+        margin-bottom: 2mm;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .print-head h2 {
+        font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+        font-size: 22pt;
+        font-weight: 800;
+        margin: 0 0 2mm 0;
+        color: #111;
+      }
+
+      .print-head small {
+        font-size: 9.5pt;
+        color: #4b4b4b;
+        font-family: "Trebuchet MS", sans-serif;
       }
 
       .print-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 8mm;
+        gap: 10mm;
+        padding: 0 8mm 8mm 8mm !important;
       }
 
       .print-grid h3 {
-        margin: 0 0 2mm;
-        font-family: Georgia, "Times New Roman", serif;
+        margin: 0 0 4mm 0;
+        font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+        font-size: 14pt;
+        font-weight: 800;
+        border-bottom: 2.5px solid #111;
+        padding-bottom: 2mm;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
 
       .print-text {
         white-space: pre-wrap;
         font-size: 11pt;
-        line-height: 1.45;
+        line-height: 1.5;
+        color: #111;
+        font-family: "Trebuchet MS", sans-serif;
       }
     }
   </style>
@@ -580,7 +641,10 @@
 
     <section id="printArea" class="panel print-shell" hidden>
       <div class="print-head">
-        <h2 id="printTopic"></h2>
+        <div class="print-header-top">
+          <h2 id="printTopic"></h2>
+          <span class="print-website-title">Do's & Don'ts Notebook</span>
+        </div>
         <small id="printTime"></small>
       </div>
       <div class="print-grid">
@@ -787,16 +851,12 @@
       const margin = 48;
       const gutter = 24;
       const colWidth = (pageWidth - margin * 2 - gutter) / 2;
-      const lineHeight = 14;
-      const footerY = 42;
-      const cardTopY = 620;
-      const cardBottomY = 94;
-      const cardHeaderHeight = 28;
-      const textInsetX = 16;
-      const textInsetY = 24;
-      const availableTextHeight = (cardTopY - cardHeaderHeight) - (cardBottomY + textInsetY);
-      const linesPerPage = Math.max(1, Math.floor(availableTextHeight / lineHeight));
-      const maxChars = 26;
+      const lineHeight = 15;
+      const footerY = 62;
+      const textTopY = 652;
+      const textBottomY = 90;
+      const linesPerPage = Math.max(1, Math.floor((textTopY - textBottomY) / lineHeight));
+      const maxChars = 34;
       const dosLines = wrapPdfText(dos || "(empty)", maxChars);
       const dontsLines = wrapPdfText(donts || "(empty)", maxChars);
       const maxBodyLines = Math.max(dosLines.length, dontsLines.length, 1);
@@ -820,62 +880,69 @@
         const end = start + linesPerPage;
         const leftLines = dosLines.slice(start, end);
         const rightLines = dontsLines.slice(start, end);
-        const leftX = margin;
-        const rightX = margin + colWidth + gutter;
-        const cardHeight = cardTopY - cardBottomY;
-        const titleLines = wrapPdfText(topic || "Untitled Topic", 24);
+        const leftX = margin + 20; // add a bit of indent inside the box
+        const rightX = margin + colWidth + gutter + 10;
+        const titleLines = wrapPdfText(topic || "Untitled Topic", 28);
         const safeTitleLines = titleLines.slice(0, 2);
         if (titleLines.length > 2) {
           const second = safeTitleLines[1] || "";
-          safeTitleLines[1] = second.length > 21 ? `${second.slice(0, 21)}...` : `${second}...`;
+          safeTitleLines[1] = second.length > 25 ? `${second.slice(0, 25)}...` : `${second}...`;
         }
         let stream = "";
 
+        // Graphics mode - draw outer border and dividers
         stream += "q\n";
-        stream += "0.98 0.99 1 rg\n";
-        stream += `${margin} 716 ${pageWidth - margin * 2} 78 re f\n`;
-        stream += "0.08 0.08 0.08 RG 2.2 w\n";
-        stream += `${margin} 716 ${pageWidth - margin * 2} 78 re S\n`;
-
-        stream += "0.87 1 0.9 rg\n";
-        stream += `${leftX} ${cardBottomY} ${colWidth} ${cardHeight} re f\n`;
-        stream += "0.1 0.65 0.3 rg\n";
-        stream += `${leftX} ${cardTopY - cardHeaderHeight} ${colWidth} ${cardHeaderHeight} re f\n`;
-        stream += "0.08 0.08 0.08 RG 2 w\n";
-        stream += `${leftX} ${cardBottomY} ${colWidth} ${cardHeight} re S\n`;
-
-        stream += "1 0.93 0.9 rg\n";
-        stream += `${rightX} ${cardBottomY} ${colWidth} ${cardHeight} re f\n`;
-        stream += "0.92 0.31 0.2 rg\n";
-        stream += `${rightX} ${cardTopY - cardHeaderHeight} ${colWidth} ${cardHeaderHeight} re f\n`;
-        stream += "0.08 0.08 0.08 RG 2 w\n";
-        stream += `${rightX} ${cardBottomY} ${colWidth} ${cardHeight} re S\n`;
+        
+        // Header background fill block
+        stream += "0.96 0.97 0.98 rg\n";
+        stream += `${margin} 710 ${pageWidth - margin * 2} 84 re f\n`;
+        
+        // Draw borders
+        stream += "0.08 0.08 0.08 RG 3.5 w\n";
+        // Outer border
+        stream += `${margin} ${margin} ${pageWidth - margin * 2} ${pageHeight - margin * 2} re S\n`;
+        // Header bottom divider
+        stream += `${margin} 710 m ${pageWidth - margin} 710 l S\n`;
+        
+        // Underline for column headers
+        stream += "2.5 w\n";
+        stream += `${leftX} 670 m ${leftX + colWidth - 10} 670 l S\n`;
+        stream += `${rightX} 670 m ${rightX + colWidth - 10} 670 l S\n`;
         stream += "Q\n";
 
+        // Text mode
         stream += "BT\n";
         stream += "0.08 0.08 0.08 rg\n";
-        stream += `/F2 22 Tf 1 0 0 1 62 765 Tm (${escapePdfText(safeTitleLines[0] || "")}) Tj\n`;
+        // Title text using Helvetica-Bold (/F2)
+        stream += `/F2 22 Tf 1 0 0 1 ${margin + 20} 752 Tm (${escapePdfText(safeTitleLines[0] || "")}) Tj\n`;
         if (safeTitleLines[1]) {
-          stream += `/F2 22 Tf 1 0 0 1 62 739 Tm (${escapePdfText(safeTitleLines[1])}) Tj\n`;
+          stream += `/F2 22 Tf 1 0 0 1 ${margin + 20} 728 Tm (${escapePdfText(safeTitleLines[1])}) Tj\n`;
         }
-        stream += `/F1 10 Tf 1 0 0 1 62 723 Tm (${escapePdfText(`Generated: ${date}`)}) Tj\n`;
-        stream += `/F1 10 Tf 1 0 0 1 458 723 Tm (${escapePdfText(`Page ${pageIndex + 1}/${pageCount}`)}) Tj\n`;
-        stream += "1 1 1 rg\n";
-        stream += `/F4 15 Tf 1 0 0 1 ${leftX + 14} ${cardTopY - 20} Tm (Do's) Tj\n`;
-        stream += `/F4 15 Tf 1 0 0 1 ${rightX + 14} ${cardTopY - 20} Tm (Don'ts) Tj\n`;
-        stream += "0.11 0.11 0.11 rg\n";
+        // Website Brand Name on the right side of the header (Helvetica-Bold, uppercase)
+        stream += `/F2 10 Tf 0.08 0.08 0.08 rg 1 0 0 1 ${pageWidth - margin - 170} 752 Tm (DO'S & DON'TS NOTEBOOK) Tj\n`;
+        
+        // Metadata / Generated info
+        stream += `/F1 9.5 Tf 0.35 0.35 0.35 rg 1 0 0 1 ${margin + 20} 694 Tm (${escapePdfText(`Generated: ${date}`)}) Tj\n`;
+        stream += `/F1 9.5 Tf 0.35 0.35 0.35 rg 1 0 0 1 ${pageWidth - margin - 70} 694 Tm (${escapePdfText(`Page ${pageIndex + 1}/${pageCount}`)}) Tj\n`;
+        
+        // Grid Column Headers
+        stream += "0.08 0.08 0.08 rg\n";
+        stream += `/F2 14 Tf 1 0 0 1 ${leftX} 678 Tm (DO'S) Tj\n`;
+        stream += `/F2 14 Tf 1 0 0 1 ${rightX} 678 Tm (DON'TS) Tj\n`;
 
+        // Column lines text
         for (let i = 0; i < linesPerPage; i += 1) {
           const left = leftLines[i] || "";
           const right = rightLines[i] || "";
-          const lineY = cardTopY - cardHeaderHeight - textInsetY - i * lineHeight;
-          stream += `/F1 11 Tf 1 0 0 1 ${leftX + textInsetX} ${lineY} Tm (${escapePdfText(left)}) Tj\n`;
-          stream += `/F1 11 Tf 1 0 0 1 ${rightX + textInsetX} ${lineY} Tm (${escapePdfText(right)}) Tj\n`;
+          const lineY = textTopY - i * lineHeight;
+          stream += `/F1 11 Tf 1 0 0 1 ${leftX} ${lineY} Tm (${escapePdfText(left)}) Tj\n`;
+          stream += `/F1 11 Tf 1 0 0 1 ${rightX} ${lineY} Tm (${escapePdfText(right)}) Tj\n`;
         }
 
-        stream += "/F1 10 Tf\n";
+        // Footer note
+        stream += "/F1 9.5 Tf\n";
         stream += "0.35 0.35 0.35 rg\n";
-        stream += `1 0 0 1 ${margin} ${footerY} Tm (Crafted by Devang Sethi) Tj\n`;
+        stream += `1 0 0 1 ${margin + 20} ${footerY} Tm (Do's & Don'ts Notebook - Crafted by Devang Sethi) Tj\n`;
         stream += "ET";
 
         const contentId = addObject(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
